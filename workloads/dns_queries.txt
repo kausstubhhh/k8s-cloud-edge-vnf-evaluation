@@ -1,0 +1,11 @@
+google.com A
+youtube.com A
+facebook.com A
+amazon.com A
+openai.com A
+cloudflare.com A
+microsoft.com A
+github.com A
+stackoverflow.com A
+wikipedia.org A
+
