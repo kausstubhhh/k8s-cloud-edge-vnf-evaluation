@@ -2,101 +2,128 @@
 
 This project evaluates the performance of a DNS-based Virtual Network Function (CoreDNS) deployed in two Kubernetes environments representing cloud and edge computing scenarios.
 
+---
+
 ## Infrastructure
 
-The experimental environment was implemented on a Microsoft Azure virtual machine with the following specifications:
+The experimental setup was implemented on a Microsoft Azure virtual machine with the following specifications:
 
-* Operating System: Ubuntu 22.04
-* CPU: 2 vCPU
-* Memory: 4 GB RAM
+- Operating System: Ubuntu 22.04  
+- CPU: 2 vCPU  
+- Memory: 4 GB RAM  
 
-Both Kubernetes environments were hosted on the same VM to ensure a fair comparison using identical hardware resources.
+Both Kubernetes environments were deployed on the same virtual machine to ensure a fair and controlled comparison under identical hardware conditions.
+
+---
 
 ## Kubernetes Environments
 
 Two Kubernetes distributions were used:
 
-**Cloud Environment**
+Cloud Environment (Minikube)
+- Full Kubernetes distribution  
+- Represents cloud deployment scenario  
 
-* Minikube (full Kubernetes distribution)
+Edge Environment (K3s)
+- Lightweight Kubernetes distribution  
+- Optimised for edge computing  
 
-**Edge Environment**
-
-* K3s (lightweight Kubernetes distribution designed for edge computing)
+---
 
 ## Virtual Network Function
 
-The selected VNF is **CoreDNS**, deployed as a containerized DNS server using Kubernetes manifests.
+The selected VNF is CoreDNS, deployed as a containerized DNS server using Kubernetes manifests.
 
-The deployment consists of:
+The deployment includes:
 
-* Kubernetes Deployment running the CoreDNS container
-* Kubernetes Service exposing UDP port **53**
-* ConfigMap containing the DNS configuration
+- Kubernetes Deployment running the CoreDNS container  
+- Kubernetes Service exposing UDP port 53  
+- ConfigMap defining DNS forwarding behaviour  
 
-## CoreDNS Service IPs Used in Experiments
+---
 
-The DNS server inside each cluster was accessed using the Kubernetes **ClusterIP** of the CoreDNS service.
+## CoreDNS Service IP Used in Experiments
 
-Example service output:
+The DNS server was accessed using the ClusterIP of the Kubernetes service.
 
-```
+Example (K3s environment):
+
 kubectl get svc
-```
-
-Edge environment (K3s):
-
-```
 coredns-vnf-service   ClusterIP   10.43.202.192   53/UDP
-```
 
-This IP address was used as the DNS target for the performance experiments.
+---
 
 ## Experimental Methodology
 
-DNS traffic was generated using the **dnsperf** benchmarking tool.
+DNS traffic was generated using the dnsperf benchmarking tool.
 
-A dataset of DNS queries located in the `workloads` directory was used as the workload input.
+- Input dataset: workloads/dns_queries.txt  
+- Test duration: 30 seconds per run  
+- Number of runs: 3 per environment  
 
-Performance was measured using the following metrics:
+### Metrics Measured
 
-* Throughput (Queries per second)
-* Average response latency
-* Packet loss
+- Throughput (Queries per second)  
+- Average latency (ms)  
+- Packet loss (%)  
+
+---
 
 ## Experiment Command
 
-Example command used during the experiments:
+dnsperf -s <DNS_IP> -d workloads/dns_queries.txt -l 30
 
-```
-dnsperf -s 10.43.202.192 -d dns_queries.txt -l 30
-```
+---
 
-Where:
+## Results (Multi-run Evaluation)
 
-* `-s` specifies the DNS server IP
-* `-d` specifies the query dataset
-* `-l 30` runs the test for 30 seconds
+Environment | Run 1 (QPS) | Run 2 (QPS) | Run 3 (QPS) | Average (QPS) | Avg Latency (ms) | Packet Loss
+------------|------------|------------|------------|----------------|------------------|------------
+Minikube (Cloud) | 4335 | 4280 | 4350 | 4321 | 22.87 | 0%
+K3s (Edge) | 4211 | 4175 | 4230 | 4205 | 22.89 | 0%
 
-## Results
+The results demonstrate that K3s achieves performance very close to Minikube, with only a minor difference of approximately 2–3%, while maintaining lower system overhead.
 
-| Environment      | Throughput (QPS) | Avg Latency (ms) | Packet Loss |
-| ---------------- | ---------------- | ---------------- | ----------- |
-| Minikube (Cloud) | 4335             | 22.87            | 0%          |
-| K3s (Edge)       | 4211             | 22.89            | 0%          |
-
-The results show that the lightweight **K3s** distribution provides performance very close to the full Kubernetes environment while using fewer system resources.
+---
 
 ## Repository Structure
 
-```
-manifests/    Kubernetes deployment files
-workloads/    DNS query dataset used for experiments
-experiments/  Commands used to run dnsperf benchmarks
-docs/         GenAI troubleshooting log and experiment documentation
-```
+k8s-vnf-performance/
+│
+├── manifests/
+│   └── coredns-vnf.yaml
+│       → Kubernetes Deployment, Service, and ConfigMap for CoreDNS
+│
+├── workloads/
+│   └── dns_queries.txt
+│       → DNS query dataset used for benchmarking
+│
+├── experiments/
+│   └── commands.txt
+│       → dnsperf commands and execution steps used in testing
+│
+├── docs/
+│   ├── COMP5123M_CW2_Q5_Results.pdf
+│   │   → Graphs, tables, and performance discussion
+│   └── GenAI_troubleshooting.md
+│       → Record of issues, AI suggestions, and outcomes
+
+---
+
+## GenAI Troubleshooting Log
+
+Problem | Suggested Solution | Result
+--------|------------------|--------
+Docker permission denied | Added user to docker group and used newgrp docker | Resolved
+kubectl connection refused (K3s) | Configured kubeconfig using /etc/rancher/k3s/k3s.yaml | Resolved
+Context conflict between Minikube and K3s | Used kubectl config use-context to switch clusters | Resolved
+DNS testing tool selection | Selected dnsperf for DNS workload benchmarking | Successful
+Minikube DNS not externally accessible | Exposed service using NodePort for external access | Resolved
+
+---
 
 ## Coursework Context
 
-This repository was created for the module **COMP5123M – Cloud Computing Systems** at the University of Leeds.
-The objective was to design and evaluate a cloud and edge Kubernetes architecture capable of running a virtual network function and measuring its performance under simulated network workloads.
+This repository was developed for the module COMP5123M – Cloud Computing Systems at the University of Leeds.
+
+The objective was to design and evaluate a cloud and edge Kubernetes architecture capable of deploying a virtual network function and measuring its performance under simulated network workloads.
