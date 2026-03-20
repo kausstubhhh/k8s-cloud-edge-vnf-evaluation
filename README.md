@@ -89,7 +89,6 @@ The results demonstrate that K3s achieves performance very close to Minikube, wi
 ## Repository Structure
 
 k8s-vnf-performance/
-│
 ├── manifests/
 │   └── coredns-vnf.yaml
 │       → Kubernetes Deployment, Service, and ConfigMap for CoreDNS
@@ -100,13 +99,13 @@ k8s-vnf-performance/
 │
 ├── experiments/
 │   └── commands.txt
-│       → dnsperf commands and execution steps used in testing
+│       → dnsperf commands and execution steps used during experiments
 │
 ├── docs/
 │   ├── COMP5123M_CW2_Q5_Results.pdf
-│   │   → Graphs, tables, and performance discussion
+│   │   → Performance results including tables, graphs, and analysis
 │   └── GenAI_troubleshooting.md
-│       → Record of issues, AI suggestions, and outcomes
+│       → Log of issues encountered, AI-assisted solutions, and outcomes
 
 ---
 
